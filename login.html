@@ -1,57 +1,63 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - ExpoConfig</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExpoConfig - Login</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="login-container">
-        <h1 class="login-title">Sistema ExpoConfig</h1>
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="email" class="form-label">Correo Electrónico</label>
-                <input type="email" id="email" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="password" class="form-label">Contraseña</label>
-                <input type="password" id="password" class="form-control" required>
-            </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Iniciar Sesión</button>
-        </form>
-        <div id="loginError" class="alert alert-danger" style="display: none;"></div>
-    </div>
+  <div class="login-container">
+    <h1 class="login-title">Iniciar Sesión</h1>
+    
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email" class="form-label">Correo Electrónico</label>
+        <input type="email" id="email" class="form-control" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="password" class="form-label">Contraseña</label>
+        <input type="password" id="password" class="form-control" required>
+      </div>
+      
+      <button type="submit" class="btn btn-primary" style="width: 100%;">Ingresar</button>
+    </form>
+    
+    <div id="loginError" class="alert alert-danger" style="display: none;"></div>
+  </div>
 
-    <script src="lib/sql.js"></script>
-    <script src="js/db.js"></script>
-    <script src="js/auth.js"></script>
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            const dbReady = await initDB();
-            if (!dbReady) {
-                showError('Error al conectar con la base de datos');
-                return;
-            }
-            
-            const success = await login(email, password);
-            if (success) {
-                window.location.href = 'dashboard.html';
-            } else {
-                showError('Credenciales incorrectas');
-            }
-        });
-        
-        function showError(message) {
-            const errorDiv = document.getElementById('loginError');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-        }
-    </script>
+  <script type="module">
+    import { login } from './js/auth.js';
+    import { initDB } from './js/db.js';
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      // Initialize database
+      const dbInitialized = await initDB();
+      if (!dbInitialized) {
+        showError('Error al conectar con la base de datos');
+        return;
+      }
+      
+      // Attempt login
+      const result = await login(email, password);
+      if (result.success) {
+        window.location.href = 'dashboard.html';
+      } else {
+        showError(result.message || 'Credenciales incorrectas');
+      }
+    });
+
+    function showError(message) {
+      const errorDiv = document.getElementById('loginError');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+    }
+  </script>
 </body>
 </html>
