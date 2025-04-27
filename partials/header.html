@@ -1,36 +1,35 @@
-<header>
+<header class="navbar">
   <div class="container">
-    <div class="navbar">
-      <a href="index.html" class="nav-brand">ExpoConfig</a>
-      <ul class="nav-menu" id="navMenu">
-        <li class="nav-item"><a href="dashboard.html" class="nav-link">Inicio</a></li>
-        <li class="nav-item"><a href="exposiciones.html" class="nav-link">Exposiciones</a></li>
-        <li class="nav-item"><a href="proyectos.html" class="nav-link">Proyectos</a></li>
-        <li class="nav-item"><a href="estudiantes.html" class="nav-link">Estudiantes</a></li>
-        <li class="nav-item"><a href="reportes.html" class="nav-link">Reportes</a></li>
-        <li class="nav-item"><a href="#" id="logoutBtn" class="nav-link">Cerrar Sesión</a></li>
-      </ul>
-    </div>
+    <a href="dashboard.html" class="navbar-brand">ExpoConfig</a>
+    <ul class="navbar-nav" id="mainNav">
+      <li class="nav-item"><a href="dashboard.html" class="nav-link">Inicio</a></li>
+      <li class="nav-item"><a href="exposiciones.html" class="nav-link">Exposiciones</a></li>
+      <li class="nav-item"><a href="eventos.html" class="nav-link">Eventos</a></li>
+      <li class="nav-item"><a href="proyectos.html" class="nav-link">Proyectos</a></li>
+      <li class="nav-item"><a href="estudiantes.html" class="nav-link">Estudiantes</a></li>
+      <li class="nav-item"><a href="profesores.html" class="nav-link">Profesores</a></li>
+      <li class="nav-item"><a href="reportes.html" class="nav-link">Reportes</a></li>
+      <li class="nav-item"><a href="usuarios.html" class="nav-link">Usuarios</a></li>
+      <li class="nav-item"><a href="#" id="logoutBtn" class="nav-link">Cerrar Sesión</a></li>
+    </ul>
   </div>
 </header>
 
 <script>
-  // Add active class to current page link
-  document.addEventListener('DOMContentLoaded', () => {
-    const currentPage = location.pathname.split('/').pop();
-    const navLinks = document.querySelectorAll('.nav-link');
-    
-    navLinks.forEach(link => {
-      if (link.getAttribute('href') === currentPage) {
-        link.classList.add('active');
-      }
-    });
-
-    // Logout button
-    document.getElementById('logoutBtn').addEventListener('click', (e) => {
-      e.preventDefault();
-      localStorage.removeItem('currentUser');
-      window.location.href = 'login.html';
-    });
+document.addEventListener('DOMContentLoaded', () => {
+  // Marcar enlace activo
+  const currentPage = window.location.pathname.split('/').pop();
+  document.querySelectorAll('.nav-link').forEach(link => {
+    if (link.getAttribute('href') === currentPage) {
+      link.classList.add('active');
+    }
   });
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    localStorage.removeItem('currentUser');
+    window.location.href = 'login.html';
+  });
+});
 </script>
