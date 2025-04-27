@@ -1,57 +1,29 @@
-// SQL.js configuration
-let db;
-let sqlLoaded = false;
-
-// Initialize SQL.js and load the database
-async function initDB() {
-    if (sqlLoaded) return true;
-
-    try {
-        // Load SQL.js
-        const SQL = await initSqlJs({
-            locateFile: file => `../lib/${file}`
-        });
-
-        // Fetch the database file
-        const response = await fetch('../expoconfig.db');
-        if (!response.ok) {
-            throw new Error('Failed to load database file');
-        }
-
-        const buffer = await response.arrayBuffer();
-        const uInt8Array = new Uint8Array(buffer);
-
-        // Create the database
-        db = new SQL.Database(uInt8Array);
-        sqlLoaded = true;
-
-        // Verify essential tables exist
-        const tables = await executeQuery("SELECT name FROM sqlite_master WHERE type='table'");
-        const requiredTables = ['Usuario', 'Rol', 'ExpoConfig'];
-        
-        for (const table of requiredTables) {
-            if (!tables.some(t => t.name === table)) {
-                console.error(`Missing table: ${table}`);
-                await setupInitialData();
-                break;
-            }
-        }
-
-        return true;
-    } catch (error) {
-        console.error('Database initialization error:', error);
-        return false;
-    }
-}
-
-// Setup initial data if tables are empty
+// En db.js, modificar la función setupInitialData()
 async function setupInitialData() {
     try {
-        // Create tables if they don't exist
+        // Crear todas las tablas si no existen
         await executeUpdate(`
             CREATE TABLE IF NOT EXISTS Rol (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nombre TEXT NOT NULL
+                nombre TEXT NOT NULL UNIQUE
+            )
+        `);
+
+        await executeUpdate(`
+            CREATE TABLE IF NOT EXISTS Permiso (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre TEXT NOT NULL UNIQUE,
+                descripcion TEXT
+            )
+        `);
+
+        await executeUpdate(`
+            CREATE TABLE IF NOT EXISTS RolPermiso (
+                id_rol INTEGER,
+                id_permiso INTEGER,
+                PRIMARY KEY (id_rol, id_permiso),
+                FOREIGN KEY (id_rol) REFERENCES Rol(id),
+                FOREIGN KEY (id_permiso) REFERENCES Permiso(id)
             )
         `);
 
@@ -66,74 +38,51 @@ async function setupInitialData() {
             )
         `);
 
-        // Insert default roles
-        await executeUpdate(`INSERT INTO Rol (nombre) VALUES ('Administrador')`);
-        await executeUpdate(`INSERT INTO Rol (nombre) VALUES ('Profesor')`);
-        await executeUpdate(`INSERT INTO Rol (nombre) VALUES ('Estudiante')`);
-
-        // Create default admin user
-        await executeUpdate(
-            `INSERT INTO Usuario (nombre, correo, contraseña, id_rol) 
-             VALUES (?, ?, ?, ?)`,
-            ['Admin', 'admin@expoconfig.com', 'admin123', 1]
+        // Insertar datos iniciales
+        await executeUpdate(`INSERT OR IGNORE INTO Rol (nombre) VALUES ('Administrador')`);
+        await executeUpdate(`INSERT OR IGNORE INTO Rol (nombre) VALUES ('Profesor')`);
+        await executeUpdate(`INSERT OR IGNORE INTO Rol (nombre) VALUES ('Estudiante')`);
+        
+        // Permisos básicos
+        const permisos = [
+            'gestionar_usuarios', 'gestionar_roles', 'gestionar_exposiciones',
+            'gestionar_proyectos', 'gestionar_eventos', 'gestionar_estudiantes'
+        ];
+        
+        for (const permiso of permisos) {
+            await executeUpdate(
+                `INSERT OR IGNORE INTO Permiso (nombre) VALUES (?)`,
+                [permiso]
+            );
+        }
+        
+        // Asignar todos los permisos al rol Administrador
+        const [adminRol] = await executeQuery(`SELECT id FROM Rol WHERE nombre = 'Administrador'`);
+        const allPermisos = await executeQuery(`SELECT id FROM Permiso`);
+        
+        for (const permiso of allPermisos) {
+            await executeUpdate(
+                `INSERT OR IGNORE INTO RolPermiso (id_rol, id_permiso) VALUES (?, ?)`,
+                [adminRol.id, permiso.id]
+            );
+        }
+        
+        // Crear usuario admin por defecto si no existe
+        const adminExists = await executeQuery(
+            `SELECT COUNT(*) as count FROM Usuario WHERE correo = 'admin@expoconfig.com'`
         );
-
-        console.log('Initial data setup completed');
-    } catch (error) {
-        console.error('Error setting up initial data:', error);
-    }
-}
-
-// Execute a SELECT query
-async function executeQuery(sql, params = []) {
-    if (!sqlLoaded) {
-        const initialized = await initDB();
-        if (!initialized) {
-            throw new Error('Database not initialized');
-        }
-    }
-
-    try {
-        const stmt = db.prepare(sql);
-        stmt.bind(params);
-        const result = [];
         
-        while (stmt.step()) {
-            result.push(stmt.getAsObject());
+        if (adminExists[0].count === 0) {
+            await executeUpdate(
+                `INSERT INTO Usuario (nombre, correo, contraseña, id_rol) 
+                 VALUES (?, ?, ?, ?)`,
+                ['Admin', 'admin@expoconfig.com', 'admin123', adminRol.id]
+            );
         }
         
-        stmt.free();
-        return result;
+        console.log('Base de datos inicializada correctamente');
     } catch (error) {
-        console.error('Query error:', error, 'SQL:', sql);
+        console.error('Error al inicializar la base de datos:', error);
         throw error;
     }
 }
-
-// Execute an INSERT, UPDATE, or DELETE query
-async function executeUpdate(sql, params = []) {
-    if (!sqlLoaded) {
-        const initialized = await initDB();
-        if (!initialized) {
-            throw new Error('Database not initialized');
-        }
-    }
-
-    try {
-        db.run(sql, params);
-        
-        // For INSERT queries, return the last inserted ID
-        if (sql.trim().toUpperCase().startsWith('INSERT')) {
-            const result = db.exec("SELECT last_insert_rowid() AS id");
-            return result[0].values[0][0];
-        }
-        
-        return true;
-    } catch (error) {
-        console.error('Update error:', error, 'SQL:', sql);
-        throw error;
-    }
-}
-
-// Export functions for use in other modules
-export { initDB, executeQuery, executeUpdate };
