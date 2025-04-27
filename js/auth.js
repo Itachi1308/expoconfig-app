@@ -45,11 +45,16 @@ function logout() {
     window.location.href = '../login.html';
 }
 
-// Check if user has permission
+// ... (código anterior permanece igual)
+
+// Función para verificar permisos
 async function checkPermission(permissionName) {
     try {
         const user = getCurrentUser();
         if (!user) return false;
+
+        // El admin tiene todos los permisos
+        if (user.id_rol === 1) return true;
 
         const result = await executeQuery(`
             SELECT COUNT(*) AS hasPermission
@@ -65,4 +70,30 @@ async function checkPermission(permissionName) {
     }
 }
 
-export { checkAuth, getCurrentUser, getUserRole, login, logout, checkPermission };
+// Middleware para proteger rutas
+async function protectRoute(requiredPermission) {
+    if (!checkAuth()) {
+        window.location.href = 'login.html';
+        return false;
+    }
+
+    if (requiredPermission) {
+        const hasPermission = await checkPermission(requiredPermission);
+        if (!hasPermission) {
+            window.location.href = 'dashboard.html';
+            return false;
+        }
+    }
+
+    return true;
+}
+
+export { 
+    checkAuth, 
+    getCurrentUser, 
+    getUserRole, 
+    login, 
+    logout, 
+    checkPermission,
+    protectRoute
+};
