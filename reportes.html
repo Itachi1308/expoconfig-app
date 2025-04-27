@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportes - ExpoConfig</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- Header estilo ESCOM -->
+  <header class="header">
+    <div class="header-container">
+      <div class="logo-container">
+        <img src="assets/logo-escom.png" alt="Logo ESCOM" class="logo">
+        <div class="logo-text">
+          <h1 class="main-title">ExpoConfig</h1>
+          <p class="subtitle">Reportes y Estadísticas</p>
+        </div>
+      </div>
+      <ul class="main-menu">
+        <li><a href="dashboard.html">Inicio</a></li>
+        <li><a href="reportes.html" class="active">Reportes</a></li>
+        <li><a href="exposiciones.html">Exposiciones</a></li>
+        <li><a href="proyectos.html">Proyectos</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <div class="card">
+      <div class="card-header">
+        <h2>Estadísticas de Participación</h2>
+      </div>
+      <div class="card-body">
+        <div class="chart-container">
+          <canvas id="participacionChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Proyectos por Evaluador</h2>
+      </div>
+      <div class="card-body">
+        <div class="chart-container">
+          <canvas id="evaluacionesChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="lib/sql.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/reportes.js"></script>
+</body>
+</html>
