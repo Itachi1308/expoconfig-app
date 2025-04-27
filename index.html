@@ -3,92 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ExpoConfig - Inicio</title>
+  <title>ExpoConfig - ESCOM</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <!-- Header -->
-  <div id="header"></div>
+  <!-- Header estilo ESCOM -->
+  <header class="header">
+    <div class="header-container">
+      <div class="logo-container">
+        <img src="assets/logo-escom.png" alt="Logo ESCOM" class="logo">
+        <div class="logo-text">
+          <h1 class="main-title">ExpoConfig</h1>
+          <p class="subtitle">Sistema de Gestión de Exposiciones Académicas</p>
+        </div>
+      </div>
+      <ul class="main-menu">
+        <li><a href="dashboard.html">Inicio</a></li>
+        <li><a href="exposiciones.html">Exposiciones</a></li>
+        <li><a href="eventos.html">Eventos</a></li>
+        <li><a href="proyectos.html">Proyectos</a></li>
+        <li><a href="estudiantes.html">Estudiantes</a></li>
+      </ul>
+    </div>
+  </header>
 
-  <!-- Main Content -->
-  <main class="main-content">
-    <div class="container">
-      <h1 class="page-title">Bienvenido al Sistema ExpoConfig</h1>
-      
+  <!-- Banner principal -->
+  <section class="banner">
+    <h1>Bienvenido al Sistema ExpoConfig</h1>
+    <p>Gestiona todas las actividades académicas de tus exposiciones</p>
+  </section>
+
+  <!-- Contenido principal -->
+  <main class="main-container">
+    <div class="grid-container">
+      <!-- Tarjeta de exposiciones -->
       <div class="card">
-        <h2>Resumen del Sistema</h2>
-        <p>Gestiona exposiciones, proyectos, estudiantes y más con esta plataforma integral.</p>
-        
-        <div class="stats-grid" id="statsContainer">
-          <!-- Stats will be loaded here -->
+        <div class="card-header">
+          <h2>Próximas Exposiciones</h2>
+        </div>
+        <div class="card-body">
+          <div id="proximasExposiciones">
+            <!-- Cargado dinámicamente -->
+            <p>Cargando información...</p>
+          </div>
+          <a href="exposiciones.html" class="btn btn-primary">Ver todas</a>
+        </div>
+      </div>
+
+      <!-- Tarjeta de eventos -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Próximos Eventos</h2>
+        </div>
+        <div class="card-body">
+          <div id="proximosEventos">
+            <!-- Cargado dinámicamente -->
+            <p>Cargando información...</p>
+          </div>
+          <a href="eventos.html" class="btn btn-primary">Ver todos</a>
         </div>
       </div>
     </div>
   </main>
 
   <!-- Footer -->
-  <div id="footer"></div>
+  <footer class="footer">
+    <div class="footer-container">
+      <p>© 2023 ExpoConfig - ESCOM IPN. Todos los derechos reservados.</p>
+      <p><a href="#">Políticas de privacidad</a> | <a href="#">Términos de uso</a></p>
+    </div>
+  </footer>
 
   <!-- Scripts -->
   <script src="lib/sql.js"></script>
   <script src="js/db.js"></script>
   <script src="js/auth.js"></script>
-  <script src="js/app.js"></script>
-  
-  <script>
-    // Load header and footer
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Check authentication
-      const { checkAuth } = await import('./js/auth.js');
-      if (!checkAuth()) {
-        window.location.href = 'login.html';
-        return;
-      }
-
-      // Load partials
-      const loadPartial = async (elementId, file) => {
-        try {
-          const response = await fetch(file);
-          const html = await response.text();
-          document.getElementById(elementId).innerHTML = html;
-        } catch (error) {
-          console.error(`Error loading ${file}:`, error);
-        }
-      };
-
-      await loadPartial('header', './partials/header.html');
-      await loadPartial('footer', './partials/footer.html');
-
-      // Load stats
-      await loadStats();
-    });
-
-    async function loadStats() {
-      try {
-        const exposCount = await executeQuery('SELECT COUNT(*) as count FROM ExpoConfig');
-        const proyectosCount = await executeQuery('SELECT COUNT(*) as count FROM Proyecto');
-        const estudiantesCount = await executeQuery('SELECT COUNT(*) as count FROM Estudiante');
-        
-        const statsContainer = document.getElementById('statsContainer');
-        statsContainer.innerHTML = `
-          <div class="stat-card">
-            <h3>Exposiciones</h3>
-            <p>${exposCount[0].count}</p>
-          </div>
-          <div class="stat-card">
-            <h3>Proyectos</h3>
-            <p>${proyectosCount[0].count}</p>
-          </div>
-          <div class="stat-card">
-            <h3>Estudiantes</h3>
-            <p>${estudiantesCount[0].count}</p>
-          </div>
-        `;
-      } catch (error) {
-        console.error('Error loading stats:', error);
-      }
-    }
-  </script>
+  <script src="js/dashboard.js"></script>
 </body>
 </html>
